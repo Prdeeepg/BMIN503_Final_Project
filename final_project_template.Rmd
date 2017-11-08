@@ -1,6 +1,6 @@
 ---
 title: "BMIN503/EPID600 Project Template"
-author: "Your Name"
+author: Pradeepkumar Govindaswamy
 output: 
   html_document:
     toc: false 
@@ -15,14 +15,13 @@ options(width = 400)
 Use this template to complete your project throughout the course. Your Final Project presentation in class will be based on the contents of this document. Replace the title/name and text below with your own, but leave the headers.
 
 ### Overview
-In this section, give a brief a description of your project and its goal, what data you are using to complete it, and what three faculty/staff in different fields you have spoken to about your project with a brief summary of what you learned from each person. Include a link to your final project GitHub repository.
-
+The project will focus on genomic and possibily epigenomic data analysis and machine learning techniques to find genes that are ultra-sensitive to cancerous genes in various organs. Priority will be given to the genes that play a major role in endothelial membrane receptors since they will most likely affect how nanoparticles’ pharmacodynamics and pharmocokinetics in the blood vessel.
 
 ### Introduction 
-In the first paragraph, describe the problem addressed, its significance, and some background to motivate the problem.
+With the accelerating development in the application of Nanomaterial in medicine, next generation pharmacodynamics modeling can accelerate the design, validation and translation of targeted nanoparticles by achieving selective targeting of affinity-ligand coated nanoparticles. Within the last 10 years, the number of FDA approved nanomaterials increased from 2 to almost 50 types. The types of nanoparticles can range from Inorganics to organic and combinations of both, which results in numerous ways to perform drug discovery, delivery and development. Case studies of companies and technology in this market space reveals a particular three part structure: A technology they focus on (DNA cages, liposomes, etc), a specific pipeline where they combine their developed drug and the nanomaterial to produce a product and finally, a disease to target. One of the major flaw of this market revolves around the effectiveness of the combined product against a particular disease such as, even if a new drug slightly shows more effectiveness than the existing product, it tries to enter the consumer market. There needs to be a more productive system were we can validate the combination of nanoparticle and the drug to engineer the best solution. This can be achieved with next generation pharma dynamics modeling with in-silico physical science oncology. With the help of experimental data, modeling and simulations of these particles with the complex biologically environment can be used to predicted the most effective solution for a particular interest in an exhaustive quantitative approach.
 
-In the second paragraph, explain why your problem is interdisciplinary, what fields can contribute to its understanding, and incorporate background related to what you learned from meeting with faculty/staff.
-
+The main step to improve the performance of nanoparticles is to have a complete understanding on the interaction of nanoparticles with the endothelial cell membrane. This is the first step towards targeted drug delivery of cancer cells and this depends on the chemistry of the affinity ligand coating that is engineered into the particle for it to selectively adhere to specific cell types based on its membrane receptor proteins. Therefore a detailed data analysis will be performed using the Genomic Data Commons Data Portal’s genomic and epigenome datasets to find out what genes are ultra sensitive to the changes in concertation of cancerous genes such as MYC. Priority will be given to membrane proteins since these can be uses as potential targets for the nanoparticle to selectively target cancerous cells. Additionally to this analysis, a Machine learning model (currently enrolled in class under Dr. Eric Eaton) can also be developed to predict what genes or a combination of them might be useful for targeting depending upon the genomic and epigenome inputs from various cancer cells. Another extension of this will be for my thesis work, under Dr. Radhakrishnan, where I will use this information to perform multiscale simulation and modeling to predict how they actually play out in the dynamics and complexity of biological processes. I will be using the experimental data from Dr. Jake Brenner’s research to validate and improve my simulation.
+In this section, give a brief a description of your project and its goal, what data you are using to complete it, and what three faculty/staff in different fields you have spoken to about your project with a brief summary of what you learned from each person. Include a link to your final project GitHub repository.
 
 ### Methods
 In the first paragraph, describe the data used and general methodological approach. Subsequently, incorporate full R code necessary to retrieve and clean data, and perform analysis. Be sure to include a description of code so that others (including your future self) can understand what you are doing and why. 
