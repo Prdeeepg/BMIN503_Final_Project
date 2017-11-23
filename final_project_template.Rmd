@@ -27,5 +27,372 @@ In this section, give a brief a description of your project and its goal, what d
 In the first paragraph, describe the data used and general methodological approach. Subsequently, incorporate full R code necessary to retrieve and clean data, and perform analysis. Be sure to include a description of code so that others (including your future self) can understand what you are doing and why. 
 
 
+# Setup:
+## Installation 
+These below two lines of codes downloads the nessasary library to access the GDC Databases
+```{r Install, eval = True}
+#source('https://bioconductor.org/biocLite.R')
+#biocLite('GenomicDataCommons')
+```
+## Library 
+```{r Library, eval = True}
+library(GenomicDataCommons)
+```
+## Chcecking Basic Functions
+```{r Check status, eval=True}
+#GenomicDataCommons::status()
+```
+
+# Analysis of Metadata:
+## Overview of GDC library functionality: 
+
+*Creating a query*
+projects()
+cases()
+files()
+annotations()
+
+*Manipulating a query*
+filter()
+facet()
+select()
+
+*Introspection on the GDC API fields*
+mapping()
+available_fields()
+default_fields()
+grep_fields()
+field_picker()
+available_values()
+available_expand()
+
+*Executing an API call to retrieve query results*
+results()
+count()
+response()
+
+*Raw data file downloads*
+gdcdata()
+transfer()
+gdc_client()
+
+*Summarizing and aggregating field values (faceting)*
+aggregations()
+
+*Authentication*
+gdc_token()
+
+*BAM file slicing*
+slicing()
+
+## Metadata count and fields analysis: 
+
+```{r Projects, eval = True}
+paste("Total number of projects available in TCGA = ", GenomicDataCommons::count(projects())) 
+paste ('Number of default fields = ', length(default_fields('projects')))
+paste ('Number of available fields = ',length(available_fields('projects')))
+data.frame(default_fields('projects'))
+data.frame(available_fields('projects'))
+
+```
+
+```{r Projects, eval = True}
+library(rjson)
+Select_Field = 'primary_site'
+#projects() %>% facet(Sel_Field) %>% aggregations()
+#results <- projects() %>% facet(Sel_Field) %>% results_all() 
+results <- projects() %>% results_all()
+#str(results)
+#data.frame(names(results$disease_type))
+print(results$primary_site)
+```
+
+```{r Cases, eval = True}
+paste("Total number of cases available in TCGA = ", count(cases())) 
+paste ('Number of default fields = ', length(default_fields('cases')))
+paste ('Number of available fields = ',length(available_fields('cases')))
+data.frame(default_fields("cases"))
+data.frame(available_fields("cases"))
+```
+
+```{r Files, eval = True}
+paste("Total number of files available in TCGA = ", count(files())) 
+paste ('Number of default fields = ', length(default_fields('files')))
+paste ('Number of available fields = ',length(available_fields('files')))
+data.frame(default_fields(files()))
+data.frame(available_fields(files()))
+```
+
+```{r Annotations in permission situations, eval = True}
+paste("Total number of annotations available in TCGA = ", count(annotations())) 
+paste ('Number of default fields = ', length(default_fields('annotations')))
+paste ('Number of available fields = ',length(available_fields('annotations')))
+data.frame(default_fields('annotations'))
+```
+
+## Projects Overview 
+```{r eval=True}
+# list of primary sites and their correponding number of projects
+projectsss = projects() %>% facet('project_id') %>% aggregations()
+projectsss$project_id
+
+
+#filtering project based on specific primary site(s) for infomation to use for file filtering: [liver]
+qproject = projects() %>% filter( ~ primary_site == 'Liver')
+Oresults = qproject %>% results_all()
+as.data.frame(Oresults)
+```
+
+
+```{r eval=True}
+# Total number of files: 
+count(files())
+
+# Total number of files aggregated on types: 
+x <- files() %>% facet('type') %>% aggregations()
+x$type
+
+# Total number of files aggregated on types: 
+x <- files() %>% facet('analysis.workflow_type') %>% aggregations()
+x$analysis.workflow_type
+
+# Total number of files in Liver Hepatocellular Carcinoma
+qfiles = files() %>% filter( ~ cases.project.project_id == 'TCGA-LIHC') %>% count()
+
+# Total number of files in Liver Hepatocellular Carcinoma and only gene expression files 
+qfiles = files() %>% filter( ~ cases.project.project_id == 'TCGA-LIHC' & type == "gene_expression") %>% count()
+qfiles
+
+qfiles = files() %>% filter( ~ cases.project.project_id == 'TCGA-LIHC' & type == "gene_expression") %>% count()
+qfiles
+```
+
+
+```{r eval=True}
+# Total number of files in Liver Hepatocellular Carcinoma
+qfiles = files()  %>% 
+            GenomicDataCommons::filter( ~ cases.project.project_id == 'TCGA-LIHC' & 
+                                          analysis.workflow_type	== 'HTSeq - FPKM-UQ') %>%
+            GenomicDataCommons::count()
+qfiles
+
+```
+
+
+```{r eval=True}
+# Setting the directory to this folder: 
+setwd("/Users/pradeep/Documents/Thesis")
+library(survival)
+
+# Reading the RNA file: 
+rna <- read.table('RNA/LIHC.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt',nrows=20533, header=T,row.names=1,sep='\t')
+
+# Removing the first row for heading: 
+rna <- rna[-1,]
+
+# Reading the Clinical data:
+clinical <- t(read.table('Clinical/LIHC.merged_only_clinical_clin_format.txt',header=T, row.names=1, sep='\t'))
+
+# Removing genes whoes number of reads are 0 for more than 50% of the samples for each gene. 
+rem <- function(x){
+  x <- as.matrix(x)
+  x <- t(apply(x,1,as.numeric))
+  r <- as.numeric(apply(x,1,function(i) sum(i == 0)))
+  remove <- which(r > dim(x)[2]*0.5)
+  return(remove)
+}
+
+remove <- rem(rna)
+
+rna <- rna[-remove,]
+
+# Finding out number of Normal and Cancer samples
+table(substr(colnames(rna),14,14))
+# There are 373 tumors and 50 normal 
+
+# get the index of the normal/control samples
+n_index <- which(substr(colnames(rna),14,14) == '1')
+t_index <- which(substr(colnames(rna),14,14) == '0')
+
+library(limma)
+
+# applying voom function from limma package to normalize the data
+vm <- function(x){
+  cond <- factor(ifelse(seq(1,dim(x)[2],1) %in% t_index, 1,  0))
+  d <- model.matrix(~1+cond)
+  x <- t(apply(x,1,as.numeric))
+  ex <- voom(x,d,plot=F)
+  return(ex$E)
+}
+
+rna_vm  <- vm(rna)
+colnames(rna_vm) <- gsub('\\.','-',substr(colnames(rna),1,12))
+
+# Looking at normalized data: 
+hist(rna_vm)
+
+# Removing old rna list: 
+rm(rna)
+
+```
+
+
+```{r eval=True}
+
+# calculate z-scores
+scal <- function(x,y){
+  mean_n <- rowMeans(y)  # mean of normal
+  sd_n <- apply(y,1,sd)  # SD of normal
+  # z score as (value - mean normal)/SD normal
+  res <- matrix(nrow=nrow(x), ncol=ncol(x))
+  colnames(res) <- colnames(x)
+  rownames(res) <- rownames(x)
+  for(i in 1:dim(x)[1]){
+    for(j in 1:dim(x)[2]){
+      res[i,j] <- (x[i,j]-mean_n[i])/sd_n[i]
+    }
+  }
+  return(res)
+}
+z_rna <- scal(rna_vm[,t_index],rna_vm[,n_index])
+
+# Setting the rownames keeping only gene name
+rownames(z_rna) <- sapply(rownames(z_rna), function(x) unlist(strsplit(x,'\\|'))[[1]])
+rm(rna_vm)
+
+# Now we look at the clinical data: 
+clinical <- as.data.frame(t(clinical))
+
+# matching the patient ID in clinical data with the colnames of z_rna
+clinical$IDs <- toupper(clinical$patient.bcr_patient_barcode)
+sum(clinical$IDs %in% colnames(z_rna)) # we have 529 patients that we could use
+
+# Getting the 
+ind_keep <- grep('days_to_new_tumor_event_after_initial_treatment',colnames(clinical))
+
+# this is a bit tedious, since there are numerous follow ups, let's collapse them together and keep the first value (the higher one) if more than one is available
+new_tum <- as.matrix(clinical[,ind_keep])
+new_tum_collapsed <- c()
+for (i in 1:dim(new_tum)[1]){
+  if ( sum ( is.na(new_tum[i,])) < dim(new_tum)[2]){
+    m <- min(new_tum[i,],na.rm=T)
+    new_tum_collapsed <- c(new_tum_collapsed,m)
+  } else {
+    new_tum_collapsed <- c(new_tum_collapsed,'NA')
+  }
+}
+
+# do the same to death
+ind_keep <- grep('days_to_death',colnames(clinical))
+death <- as.matrix(clinical[,ind_keep])
+death_collapsed <- c()
+for (i in 1:dim(death)[1]){
+  if ( sum ( is.na(death[i,])) < dim(death)[2]){
+    m <- max(death[i,],na.rm=T)
+    death_collapsed <- c(death_collapsed,m)
+  } else {
+    death_collapsed <- c(death_collapsed,'NA')
+  }
+}
+
+# and days last follow up here we take the most recent which is the max number
+ind_keep <- grep('days_to_last_followup',colnames(clinical))
+fl <- as.matrix(clinical[,ind_keep])
+fl_collapsed <- c()
+for (i in 1:dim(fl)[1]){
+  if ( sum (is.na(fl[i,])) < dim(fl)[2]){
+    m <- max(fl[i,],na.rm=T)
+    fl_collapsed <- c(fl_collapsed,m)
+  } else {
+    fl_collapsed <- c(fl_collapsed,'NA')
+  }
+}
+
+# and put everything together
+all_clin <- data.frame(new_tum_collapsed,death_collapsed,fl_collapsed)
+colnames(all_clin) <- c('new_tumor_days', 'death_days', 'followUp_days')
+
+```
+
+
+```{r eval=True}
+
+# create vector with time to new tumor containing data to censor for new_tumor
+all_clin$new_time <- c()
+for (i in 1:length(as.numeric(as.character(all_clin$new_tumor_days)))){
+  all_clin$new_time[i] <- ifelse ( is.na(as.numeric(as.character(all_clin$new_tumor_days))[i]),
+                    as.numeric(as.character(all_clin$followUp_days))[i],as.numeric(as.character(all_clin$new_tumor_days))[i])
+}
+
+# create vector time to death containing values to censor for death
+all_clin$new_death <- c()
+for (i in 1:length(as.numeric(as.character(all_clin$death_days)))){
+  all_clin$new_death[i] <- ifelse ( is.na(as.numeric(as.character(all_clin$death_days))[i]),
+                                 as.numeric(as.character(all_clin$followUp_days))[i],as.numeric(as.character(all_clin$death_days))[i])
+}
+
+```
+
+
+```{r eval=True}
+# create vector for death censoring
+
+table(clinical$"patient.follow_ups.follow_up.vital_status")
+# alive dead
+# 372   161
+#all_clin <- as.data.frame(all_clin)
+all_clin$death_event <- ifelse(clinical$patient.follow_ups.follow_up.vital_status == 'alive', 0,1)
+
+#finally add row.names to clinical
+rownames(all_clin) <- clinical$IDs
+
+```
+
+
+```{r eval=True}
+
+# create event vector for RNASeq data
+event_rna <- t(apply(z_rna, 1, function(x) ifelse(abs(x) > 1.96,1,0)))
+
+# since we need the same number of patients in both clinical and RNASeq data take the indices for the matching samples
+ind_tum <- which(unique(colnames(z_rna)) %in% rownames(all_clin))
+ind_clin <- which(rownames(all_clin) %in% colnames(z_rna))
+
+# pick your gene of interest
+ind_gene <- which(rownames(z_rna) == 'TP53')
+
+# check how many altered samples we have
+table(event_rna[ind_gene,])
+
+# run survival analysis
+s <- survfit(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum])
+s1 <- tryCatch(survdiff(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum]), error = function(e) return(NA))
+
+# extraect the p.value
+#pv <- ifelse( is.na(s1),next,(round(1 - pchisq(s1$chisq, length(s1$n) - 1),3)))[[1]]
+#pv <- ifelseis.na(s1), next,(round(1 - pchisq(s1$chisq, length(s1$n) - 1),7))[[1]]
+pv <- if (is.na(s1)) next else(round(1 - pchisq(s1$chisq, length(s1$n) - 1),7))[[1]]
+
+# plot the data
+plot(survfit(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum]),
+     col=c(1:3), frame=F, lwd=2,main=paste('KIRK',rownames(z_rna)[ind_gene],sep='\n'))
+
+# add lines for the median survival
+x1 <- ifelse ( is.na(as.numeric(summary(s)$table[,'median'][1])),'NA',as.numeric(summary(s)$table[,'median'][1]))
+x2 <- as.numeric(summary(s)$table[,'median'][2])
+#if(x1 != 'NA' & x2 != 'NA'){
+#nbsp; lines(c(0,x1),c(0.5,0.5),col='blue')
+#&nbsp; lines(c(x1,x1),c(0,0.5),col='black')
+#&nbsp; lines(c(x2,x2),c(0,0.5),col='red')
+#}
+
+# add legend
+legend(1800,0.995,legend=paste('p.value = ',pv[[1]],sep=''),bty='n',cex=1.4)
+legend(max(as.numeric(as.character(all_clin$death_days)[ind_clin]),na.rm = T)*0.7,0.94,
+       legend=c(paste('NotAltered=',x1),paste('Altered=',x2)),bty='n',cex=1.3,lwd=3,col=c('black','red'))
+
+```
+
+
 ### Results
 Describe your results and include relevant tables, plots, and code/comments used to obtain them. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
