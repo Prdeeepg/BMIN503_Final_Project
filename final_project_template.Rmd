@@ -1,6 +1,6 @@
 ---
-title: "BMIN503/EPID600 Project Template"
-author: Pradeepkumar Govindaswamy
+title: "Genetic analysis of TCGA metadata for advancing Nanoscale Drug Delivery and Imaging systems"
+author: "Pradeepkumar Govindaswamy"
 output: 
   html_document:
     toc: false 
@@ -12,188 +12,134 @@ output:
 options(width = 400)
 ```  
 ***
-Use this template to complete your project throughout the course. Your Final Project presentation in class will be based on the contents of this document. Replace the title/name and text below with your own, but leave the headers.
-
 ### Overview
-The project will focus on genomic and possibily epigenomic data analysis and machine learning techniques to find genes that are ultra-sensitive to cancerous genes in various organs. Priority will be given to the genes that play a major role in endothelial membrane receptors since they will most likely affect how nanoparticles’ pharmacodynamics and pharmocokinetics in the blood vessel.
+The project will focus on genomic and possibly epigenomic data analysis and machine learning techniques to find genes that are ultra-sensitive to cancerous genes in various organs. Priority will be given to the genes that play a major role in endothermic membrane receptors since they will most likely affect nano particles’ pharmacodynamics and pharmocokinetics characteristics in the blood vessel.
 
 ### Introduction 
 With the accelerating development in the application of Nanomaterial in medicine, next generation pharmacodynamics modeling can accelerate the design, validation and translation of targeted nanoparticles by achieving selective targeting of affinity-ligand coated nanoparticles. Within the last 10 years, the number of FDA approved nanomaterials increased from 2 to almost 50 types. The types of nanoparticles can range from Inorganics to organic and combinations of both, which results in numerous ways to perform drug discovery, delivery and development. Case studies of companies and technology in this market space reveals a particular three part structure: A technology they focus on (DNA cages, liposomes, etc), a specific pipeline where they combine their developed drug and the nanomaterial to produce a product and finally, a disease to target. One of the major flaw of this market revolves around the effectiveness of the combined product against a particular disease such as, even if a new drug slightly shows more effectiveness than the existing product, it tries to enter the consumer market. There needs to be a more productive system were we can validate the combination of nanoparticle and the drug to engineer the best solution. This can be achieved with next generation pharma dynamics modeling with in-silico physical science oncology. With the help of experimental data, modeling and simulations of these particles with the complex biologically environment can be used to predicted the most effective solution for a particular interest in an exhaustive quantitative approach.
 
-The main step to improve the performance of nanoparticles is to have a complete understanding on the interaction of nanoparticles with the endothelial cell membrane. This is the first step towards targeted drug delivery of cancer cells and this depends on the chemistry of the affinity ligand coating that is engineered into the particle for it to selectively adhere to specific cell types based on its membrane receptor proteins. Therefore a detailed data analysis will be performed using the Genomic Data Commons Data Portal’s genomic and epigenome datasets to find out what genes are ultra sensitive to the changes in concertation of cancerous genes such as MYC. Priority will be given to membrane proteins since these can be uses as potential targets for the nanoparticle to selectively target cancerous cells. Additionally to this analysis, a Machine learning model (currently enrolled in class under Dr. Eric Eaton) can also be developed to predict what genes or a combination of them might be useful for targeting depending upon the genomic and epigenome inputs from various cancer cells. Another extension of this will be for my thesis work, under Dr. Radhakrishnan, where I will use this information to perform multiscale simulation and modeling to predict how they actually play out in the dynamics and complexity of biological processes. I will be using the experimental data from Dr. Jake Brenner’s research to validate and improve my simulation.
-In this section, give a brief a description of your project and its goal, what data you are using to complete it, and what three faculty/staff in different fields you have spoken to about your project with a brief summary of what you learned from each person. Include a link to your final project GitHub repository.
+The main step to improve the performance of nanoparticles is to have a complete understanding on the interaction of nanoparticles with the endothelial cell membrane. This is the first step towards targeted drug delivery of cancer cells and this depends on the chemistry of the affinity ligand coating that is engineered into the particle for it to selectively adhere to specific cell types based on its membrane receptor proteins. Therefore a detailed data analysis will be performed using the Genomic Data Commons Data Portal’s genomic and epigenome datasets to find out what genes are ultra sensitive to the changes in concentration of cancerous genes such as MYC. Priority will be given to membrane proteins since these can be uses as potential targets for the nanoparticle to selectively target cancerous cells. Additionally to this analysis, a Machine learning model (currently enrolled in class under Dr. Eric Eaton) can also be developed to predict what genes or a combination of them might be useful for targeting depending upon the genomic and epigenome inputs from various cancer cells. Another extension of this will be for my thesis work, under Dr. Radhakrishnan, where I will use this information to perform multiscale simulation and modeling to predict how they actually play out in the dynamics and complexity of biological processes. I will be using the experimental data from Dr. Jake Brenner’s research to validate and improve my simulation.
 
 ### Methods
-In the first paragraph, describe the data used and general methodological approach. Subsequently, incorporate full R code necessary to retrieve and clean data, and perform analysis. Be sure to include a description of code so that others (including your future self) can understand what you are doing and why. 
+For this project, the GenomicDataCommons API was used to analyse the metadata in order to subset a particular project and its associated file type. Then According to analyses, two files were downloaded from the TCGA dataset from the website http://gdac.broadinstitute.org/ for the LIHC Project and named the folders as following: <br /><br />
+RNA = illuminahiseq_rnaseqv2-RSEM_genes_normalized and <br />
+Clinical = Merge_Clinical
 
+#### Setup
 
-# Setup:
-## Installation 
-These below two lines of codes downloads the nessasary library to access the GDC Databases
-```{r Install, eval = True}
+First, the API was installed and the necessary libraries were downloaded:  
+##### Library Download
+```{r, eval=TRUE}
 #source('https://bioconductor.org/biocLite.R')
 #biocLite('GenomicDataCommons')
 ```
-## Library 
-```{r Library, eval = True}
+
+##### Activating Libraries: 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
 library(GenomicDataCommons)
+library(ggplot2)
+library(rbokeh)
+library(knitr)
+library(kableExtra)
+library(jsonlite)
+library(listviewer)
+library(survival)
+library(rnaseqGene)
 ```
-## Chcecking Basic Functions
-```{r Check status, eval=True}
+
+##### Checking Basic Functions of TCGA API
+```{r, eval=TRUE}
 #GenomicDataCommons::status()
 ```
 
-# Analysis of Metadata:
-## Overview of GDC library functionality: 
+#### Initial Analysis
+In TCGA database, there are 4 metadata projects(), cases(), files() and annotations().<br /><br />
 
-*Creating a query*
-projects()
-cases()
-files()
-annotations()
+##### projects() analysis: 
+The JSON table gives very good insight into how the complicated database is structured from the nodes of the metadata. 
 
-*Manipulating a query*
-filter()
-facet()
-select()
-
-*Introspection on the GDC API fields*
-mapping()
-available_fields()
-default_fields()
-grep_fields()
-field_picker()
-available_values()
-available_expand()
-
-*Executing an API call to retrieve query results*
-results()
-count()
-response()
-
-*Raw data file downloads*
-gdcdata()
-transfer()
-gdc_client()
-
-*Summarizing and aggregating field values (faceting)*
-aggregations()
-
-*Authentication*
-gdc_token()
-
-*BAM file slicing*
-slicing()
-
-## Metadata count and fields analysis: 
-
-```{r Projects, eval = True}
+```{r, eval=TRUE}
 paste("Total number of projects available in TCGA = ", GenomicDataCommons::count(projects())) 
 paste ('Number of default fields = ', length(default_fields('projects')))
 paste ('Number of available fields = ',length(available_fields('projects')))
-data.frame(default_fields('projects'))
-data.frame(available_fields('projects'))
-
+# Table of dafault field in projects:
+kable(data.frame(default_fields('projects')), "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "left")
+# Table of all available field in projects:
+kable(data.frame(available_fields('projects')), "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "left")%>%
+  scroll_box(width = "500px", height = "300px")
+# JSON Table of default project fields: 
+all_field_project <- projects()%>%results_all()
+jsonedit(all_field_project,mode = "view")
+# JSON Table of Disease type of all the projects and sub projects: 
+jsonedit(all_field_project$disease_type,mode = "view")    
 ```
 
-```{r Projects, eval = True}
-library(rjson)
-Select_Field = 'primary_site'
-#projects() %>% facet(Sel_Field) %>% aggregations()
-#results <- projects() %>% facet(Sel_Field) %>% results_all() 
-results <- projects() %>% results_all()
-#str(results)
-#data.frame(names(results$disease_type))
-print(results$primary_site)
-```
-
-```{r Cases, eval = True}
-paste("Total number of cases available in TCGA = ", count(cases())) 
-paste ('Number of default fields = ', length(default_fields('cases')))
-paste ('Number of available fields = ',length(available_fields('cases')))
-data.frame(default_fields("cases"))
-data.frame(available_fields("cases"))
-```
-
-```{r Files, eval = True}
-paste("Total number of files available in TCGA = ", count(files())) 
-paste ('Number of default fields = ', length(default_fields('files')))
-paste ('Number of available fields = ',length(available_fields('files')))
-data.frame(default_fields(files()))
-data.frame(available_fields(files()))
-```
-
-```{r Annotations in permission situations, eval = True}
-paste("Total number of annotations available in TCGA = ", count(annotations())) 
-paste ('Number of default fields = ', length(default_fields('annotations')))
-paste ('Number of available fields = ',length(available_fields('annotations')))
-data.frame(default_fields('annotations'))
-```
-
-## Projects Overview 
-```{r eval=True}
-# list of primary sites and their correponding number of projects
-projectsss = projects() %>% facet('project_id') %>% aggregations()
-projectsss$project_id
-
-
-#filtering project based on specific primary site(s) for infomation to use for file filtering: [liver]
-qproject = projects() %>% filter( ~ primary_site == 'Liver')
-Oresults = qproject %>% results_all()
-as.data.frame(Oresults)
-```
-
-
-```{r eval=True}
-# Total number of files: 
-count(files())
-
-# Total number of files aggregated on types: 
-x <- files() %>% facet('type') %>% aggregations()
-x$type
-
-# Total number of files aggregated on types: 
-x <- files() %>% facet('analysis.workflow_type') %>% aggregations()
-x$analysis.workflow_type
-
-# Total number of files in Liver Hepatocellular Carcinoma
-qfiles = files() %>% filter( ~ cases.project.project_id == 'TCGA-LIHC') %>% count()
-
-# Total number of files in Liver Hepatocellular Carcinoma and only gene expression files 
-qfiles = files() %>% filter( ~ cases.project.project_id == 'TCGA-LIHC' & type == "gene_expression") %>% count()
-qfiles
-
-qfiles = files() %>% filter( ~ cases.project.project_id == 'TCGA-LIHC' & type == "gene_expression") %>% count()
-qfiles
-```
-
-
-```{r eval=True}
-# Total number of files in Liver Hepatocellular Carcinoma
-qfiles = files()  %>% 
-            GenomicDataCommons::filter( ~ cases.project.project_id == 'TCGA-LIHC' & 
-                                          analysis.workflow_type	== 'HTSeq - FPKM-UQ') %>%
-            GenomicDataCommons::count()
-qfiles
+##### cases() Analysis:
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Projects and No. of cases:
+res = cases() %>% facet("project.project_id") %>% aggregations() %>% data.frame()
+colnames(res) <- c("Project", "NoOfCases")
+kable(res, "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "center")%>%
+  scroll_box(width = "200px", height = "500px")
+# Bar plot of Projects and No. of cases: 
+figure(width = 900, ylab = "No. Of Cases", xlab = "Projects", title = "Project~Cases(All)") %>% ly_bar(Project, NoOfCases, data = res,hover = res$NoOfCases ) %>% theme_axis("x", major_label_orientation = 90)
+# Bar plot of Projects and No. of cases without the FM-AD Project: 
+res <- res[-1,]
+figure(width = 900, ylab = "No. Of Cases", xlab = "Projects", title = "Project~Cases(w/o FM-AD)") %>% ly_bar(res$Project, res$NoOfCases, hover = res$NoOfCases) %>% theme_axis("x", major_label_orientation = 90)
+# No. of cases in the HCC Liver cancer project: 
+cases()  %>% GenomicDataCommons::filter( ~ project.project_id == 'TCGA-LIHC'  ) %>% GenomicDataCommons::count()
 
 ```
 
 
-```{r eval=True}
-# Setting the directory to this folder: 
-setwd("/Users/pradeep/Documents/Thesis")
-library(survival)
+##### files() Analysis:
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+#Different file type:
+q = files() %>%
+    GenomicDataCommons::select(available_fields('files')) %>%
+    GenomicDataCommons::filter(~ cases.project.project_id=='TCGA-LIHC' &
+             data_type=='Gene Expression Quantification')
+q %>% facet('analysis.workflow_type') %>% aggregations() %>% kable()%>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "center")
+# Total number of HiSeq files in Liver Hepatocellular Carcinoma
+files()  %>% GenomicDataCommons::filter( ~ cases.project.project_id == 'TCGA-LIHC' & analysis.workflow_type	== 'HTSeq - FPKM-UQ') %>% GenomicDataCommons::count()
+# Data type of files available in TCGA dataset: 
+files() %>% facet('data_type') %>% aggregations()%>%kable()%>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "center")%>%
+  scroll_box(width = "400px", height = "500px")
+# Analysis Workflow_type available in TCGA dataset:
+files() %>% facet('analysis.workflow_type') %>% aggregations()%>%kable()%>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "center")%>%
+  scroll_box(width = "400px", height = "500px")
+```
 
+##### File Download: 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
 # Reading the RNA file: 
-rna <- read.table('RNA/LIHC.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt',nrows=20533, header=T,row.names=1,sep='\t')
+mRNAseq <- read.table('RNA/LIHC.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt',nrows=20533, header=T,row.names=1,sep='\t')
 
-# Removing the first row for heading: 
-rna <- rna[-1,]
+# Dimensions of mRNASeq Matrix:
+dim(mRNAseq)
 
-# Reading the Clinical data:
-clinical <- t(read.table('Clinical/LIHC.merged_only_clinical_clin_format.txt',header=T, row.names=1, sep='\t'))
+# First 5 rows and 5 columns of mRNAseq Matrix:
+kable(mRNAseq[1:5,1:5], "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "center") %>%
+  scroll_box(width = "900px", height = "300px")
+```
 
-# Removing genes whoes number of reads are 0 for more than 50% of the samples for each gene. 
+##### Removing the First Row from the matrix: 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+mRNAseq <-mRNAseq[-1,]
+kable(mRNAseq[1:5,1:5], "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "center") %>%
+  scroll_box(width = "900px", height = "300px")
+```
+
+##### Removing Genes with more than 50% of their counts equal to 0: 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
 rem <- function(x){
   x <- as.matrix(x)
   x <- t(apply(x,1,as.numeric))
@@ -201,22 +147,70 @@ rem <- function(x){
   remove <- which(r > dim(x)[2]*0.5)
   return(remove)
 }
+remove <- rem(mRNAseq)
+# Number of rows with more than 50% of their counts equal to 0: 
+length(remove)
+# Reduced mRNAseq matrix dimensions:  
+mRNAseq <- mRNAseq[-remove,]
+dim(mRNAseq)
+```
 
-remove <- rem(rna)
+##### Gene Matrix Analysis and log2(x+1) transformed matrix analysis:
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+rna <- mRNAseq
+rna <- as.matrix(rna)
+rna <- apply(rna,1,as.numeric)
+rna <-t(rna)
+# Histogram of all mRNAseq counts:
+hist(rna)
+# Histogram of Column Sum:
+hist(colSums(rna))
+# Histogram of Column Mean:
+hist(colMeans(rna))
+# Histogram of Column Standard Deviation:
+hist(colSds(rna))
+# Density plot of Column Mean vs Column Standard deviation:
+figure(ylab = "Stan. Dev. of Columns(mRNAseq)", xlab = "Means of Columns(mRNAseq)", title = "Standard Deviation vs Mean of Columns of mRNAseq (Between samples)") %>% ly_hexbin(colMeans(rna), colSds(rna)) 
+# Histogram of row Mean:
+hist(rowMeans(rna))
+# Histogram of row Standard Deviation:
+hist(rowSds(rna)) 
+# Density plot of Row Mean vs row Standard Deviation:
+figure(ylab = "Stan. Dev. of Rows(mRNAseq)", xlab = "Means of Rows(mRNAseq)", title = "Standard Deviation vs Mean of Rows of mRNAseq (Between Genes)") %>% ly_hexbin(rowMeans(rna), rowSds(rna)) 
+# puseudocount and log base 2 transformation of gene counts: 
+log.mRNA.one <- log2(rna + 1)
+# Histogram of all log.mRNA.one:
+hist(log.mRNA.one)
+# Histogram of Column Sum:
+hist(colSums(log.mRNA.one))
+# Histogram of Column Mean:
+hist(colMeans(log.mRNA.one))
+# Histogram of Column Standard Deviation:
+hist(colSds(log.mRNA.one))
+# Density plot of Mean and SD of column of transformed matrix  
+figure(ylab = "Stan. Dev. of Columns(Log.one.(mRNAseq))", xlab = "Means of Columns(Log.one.(mRNAseq))", title = "Standard Deviation vs Mean of Columns of transformed mRNAseq (Between samples)") %>% ly_hexbin(colMeans(log.mRNA.one), colSds(log.mRNA.one)) 
+# Histogram of row Mean:
+hist(rowMeans(log.mRNA.one))
+# Histogram of row Standard Deviation:
+hist(rowSds(log.mRNA.one)) 
+# Density plot of Mean and SD of rows of transformed matrix  
+figure(ylab = "Stan. Dev. of Rows(Log.one.(mRNAseq)", xlab = "Means of Rows(Log.one.(mRNAseq))", title = "Standard Deviation vs Mean of Rows of mRNAseq (Between Genes)") %>% ly_hexbin(rowMeans(log.mRNA.one), rowSds(log.mRNA.one)) 
+rm(log.mRNA.one)
+```
+The raw count matrix does not represent an ideal dataset to work with and perform genetic analysis, therefore pesudocount and log base 2 transformated matrix and the voom analysis were performed. 
 
-rna <- rna[-remove,]
-
-# Finding out number of Normal and Cancer samples
-table(substr(colnames(rna),14,14))
-# There are 373 tumors and 50 normal 
-
-# get the index of the normal/control samples
-n_index <- which(substr(colnames(rna),14,14) == '1')
-t_index <- which(substr(colnames(rna),14,14) == '0')
-
+##### Voom Normalized Gene Analysis: 
+To apply the voom normalization function, the number of normal and cancer cases is needed. In this LIHC project, there are 50 normal cases and 373 cancer cases. 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
 library(limma)
+# Number of Normal cell samples: 
+n_index <- which(substr(colnames(mRNAseq),14,14) == '1')
+length(n_index)
+# Number of tumor cell samples: 
+t_index <- which(substr(colnames(mRNAseq),14,14) == '0')
+length(t_index)
+# Applying voom function from limma package to normalize the data
 
-# applying voom function from limma package to normalize the data
 vm <- function(x){
   cond <- factor(ifelse(seq(1,dim(x)[2],1) %in% t_index, 1,  0))
   d <- model.matrix(~1+cond)
@@ -225,25 +219,37 @@ vm <- function(x){
   return(ex$E)
 }
 
-rna_vm  <- vm(rna)
-colnames(rna_vm) <- gsub('\\.','-',substr(colnames(rna),1,12))
+rna_vm  <- vm(mRNAseq)
+colnames(rna_vm) <- gsub('\\.','-',substr(colnames(mRNAseq),1,12))
 
-# Looking at normalized data: 
+# Histogram of all normalized counts with voom function: 
 hist(rna_vm)
-
-# Removing old rna list: 
-rm(rna)
-
+# Histogram of Column Sum:
+hist(colSums(rna_vm))
+# Histogram of Column Mean:
+hist(colMeans(rna_vm))
+# Histogram of Column Standard Deviation:
+hist(colSds(rna_vm))
+# Density plot of Column Mean vs Column Standard deviation:
+figure(ylab = "Stan. Dev. of Columns(rna_vm)", xlab = "Means of Columns(rna_vm)", title = "Standard Deviation vs Mean of Columns of rna_vm (Between samples)") %>% ly_hexbin(colMeans(rna_vm), colSds(rna_vm)) 
+# Histogram of row Mean:
+hist(rowMeans(rna_vm))
+# Histogram of row Standard Deviation:
+hist(rowSds(rna_vm)) 
+# Density plot of Row Mean vs row Standard Deviation:
+figure(ylab = "Stan. Dev. of Rows(rna_vm)", xlab = "Means of Rows(rna_vm)", title = "Standard Deviation vs Mean of Rows of rna_vm (Between Genes)") %>% ly_hexbin(rowMeans(rna_vm), rowSds(rna_vm)) 
 ```
+The log2(x+1) transformation distrbution is almost the same as the voom function normalized set but by comparing the mean vs standard deviation plots for both of these normalization, the voom functions's column distrubtion ( that is between samples) is better to consider for genetic analysis since it has a more uniform spread. 
 
 
-```{r eval=True}
+##### Z-score matrix of mRNAseq normalized counts: 
+Here the Z- score for each gene in each sample is calculated by comparing the normal and cancer samples from the cases. This allows us to consider individual gene significant values instead of calucating pvalues for all genes combined to find the signinifant genes. By calculating the z score, we can find if a particular gene is significantly up or down regulated for each patient. 
 
-# calculate z-scores
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Calculating Z Score
 scal <- function(x,y){
   mean_n <- rowMeans(y)  # mean of normal
   sd_n <- apply(y,1,sd)  # SD of normal
-  # z score as (value - mean normal)/SD normal
   res <- matrix(nrow=nrow(x), ncol=ncol(x))
   colnames(res) <- colnames(x)
   rownames(res) <- rownames(x)
@@ -258,19 +264,89 @@ z_rna <- scal(rna_vm[,t_index],rna_vm[,n_index])
 
 # Setting the rownames keeping only gene name
 rownames(z_rna) <- sapply(rownames(z_rna), function(x) unlist(strsplit(x,'\\|'))[[1]])
-rm(rna_vm)
 
-# Now we look at the clinical data: 
-clinical <- as.data.frame(t(clinical))
+# Dimensions of Z score for each genes in each tumor samples in terms of normal sample values 
+dim(z_rna)
+```
 
-# matching the patient ID in clinical data with the colnames of z_rna
+##### Significant analysis for each gene: 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+#Histogram of significant genes in each gene sample  
+sig <-  apply(z_rna, 1, function(x) length(which(x > 1.96)))
+length(sig)
+figure() %>% ly_hist(sig) 
+# Non-significant genes with all zscore as 0
+length(which(sig==0))
+```
+
+
+
+
+
+
+
+#### CLINICAL DATA:
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Clinical Data upload
+clinical <- t(read.table('Clinical/LIHC.merged_only_clinical_clin_format.txt',header=T, row.names=1, sep='\t'))
+```
+
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Dimensions of Clinical data:
+dim(clinical)
+# Sample of first 5 rows and columns of clinical data: 
+temp <- as.data.frame(clinical[1:5,1:5])
+kable(temp, "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "left") %>%
+  scroll_box(width = "900px", height = "300px")
+```
+
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Number of Samples in clinical data: 
+length(colnames(clinical))
+# Number of Samples in z_rna data: 
+length(colnames(z_rna))
+# Number of clinical cases we can use from the available:
+clinical <- as.data.frame(clinical)
 clinical$IDs <- toupper(clinical$patient.bcr_patient_barcode)
-sum(clinical$IDs %in% colnames(z_rna)) # we have 529 patients that we could use
+sum(clinical$IDs %in% colnames(z_rna))
+```
 
-# Getting the 
+##### Subsetting Fields we need to perform survival analysis: 
+Since there are multiple fields in clinical dataset and we need only specific fields for analysis, matrix will be reduced by combining those fields. In the clinical dataset, we need three main fields, tumor event, death event for survival analysis and follow up event for censoring. For new tumor event, There are 8 fields which will all be combined by taking the highest value of all the fields. 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Number of columns with new tumor event data: 
 ind_keep <- grep('days_to_new_tumor_event_after_initial_treatment',colnames(clinical))
+length(ind_keep)
+# Column names of all new tumor event fields: 
+kable(colnames(clinical)[ind_keep], "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "left") 
+```
 
-# this is a bit tedious, since there are numerous follow ups, let's collapse them together and keep the first value (the higher one) if more than one is available
+The same will be performed for the 5 fields that contain death infomation. 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Number of columns with days to death field: 
+inddeath_keep <- grep('days_to_death',colnames(clinical))
+length(inddeath_keep)
+# Column names of all days to death fields: 
+kable(colnames(clinical)[inddeath_keep], "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "left")
+```
+
+Similarily, for the follow up fields too. 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Number of columns with last day of follow up field: 
+indfollow_keep <- grep('days_to_last_followup',colnames(clinical))
+length(indfollow_keep)
+# Column names of all last day to follow up fields: 
+kable(colnames(clinical)[indfollow_keep], "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "left")
+
+```
+
+Now that we know what fields are we can combine for the final analysis, a new matrix is generated by the following code: 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# For New tumore event: 
 new_tum <- as.matrix(clinical[,ind_keep])
 new_tum_collapsed <- c()
 for (i in 1:dim(new_tum)[1]){
@@ -282,7 +358,7 @@ for (i in 1:dim(new_tum)[1]){
   }
 }
 
-# do the same to death
+# For death events: 
 ind_keep <- grep('days_to_death',colnames(clinical))
 death <- as.matrix(clinical[,ind_keep])
 death_collapsed <- c()
@@ -295,7 +371,7 @@ for (i in 1:dim(death)[1]){
   }
 }
 
-# and days last follow up here we take the most recent which is the max number
+# For follow up events: 
 ind_keep <- grep('days_to_last_followup',colnames(clinical))
 fl <- as.matrix(clinical[,ind_keep])
 fl_collapsed <- c()
@@ -308,60 +384,153 @@ for (i in 1:dim(fl)[1]){
   }
 }
 
-# and put everything together
+# Combining the fields together to create an analysis matrix: 
 all_clin <- data.frame(new_tum_collapsed,death_collapsed,fl_collapsed)
 colnames(all_clin) <- c('new_tumor_days', 'death_days', 'followUp_days')
 
+#Dimensions of all_clin matrix: 
+dim(all_clin)
+
+# Sample of clinical data 
+kable(head(all_clin), "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover", "condensed"), full_width = F, position = "left")
 ```
 
-
-```{r eval=True}
-
-# create vector with time to new tumor containing data to censor for new_tumor
+##### Censoring for cases we cannot use in analysis: 
+Since some patients sometimes discontinue their treatment or for some reason, the death or tumor event is not recorded, these datas are removed from the analysis since we would like to keep only the cases where a certain death event or survival event is known. Therefore, for each cases, if the follow up event is the longest date available compared to the death and tumor event, then these rows will not be considered. 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# vector with time to new tumor containing data to censor for new_tumor
 all_clin$new_time <- c()
 for (i in 1:length(as.numeric(as.character(all_clin$new_tumor_days)))){
   all_clin$new_time[i] <- ifelse ( is.na(as.numeric(as.character(all_clin$new_tumor_days))[i]),
                     as.numeric(as.character(all_clin$followUp_days))[i],as.numeric(as.character(all_clin$new_tumor_days))[i])
 }
 
-# create vector time to death containing values to censor for death
+
+# vector with time to death containing values to censor for death
 all_clin$new_death <- c()
 for (i in 1:length(as.numeric(as.character(all_clin$death_days)))){
   all_clin$new_death[i] <- ifelse ( is.na(as.numeric(as.character(all_clin$death_days))[i]),
                                  as.numeric(as.character(all_clin$followUp_days))[i],as.numeric(as.character(all_clin$death_days))[i])
 }
 
-```
+dim(all_clin)
 
-
-```{r eval=True}
-# create vector for death censoring
-
-table(clinical$"patient.follow_ups.follow_up.vital_status")
-# alive dead
-# 372   161
-#all_clin <- as.data.frame(all_clin)
 all_clin$death_event <- ifelse(clinical$patient.follow_ups.follow_up.vital_status == 'alive', 0,1)
 
-#finally add row.names to clinical
+# Adding row.names to clinical
 rownames(all_clin) <- clinical$IDs
+```
+
+### Results
+##### Matrix for survival analysis: 
+Using the cases we have analysed, filtered and censored, they will be used to filter the rna seq data for those patients only and ignore the others by the following below code. 
+
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Event vector for RNASeq data
+event_rna <- t(apply(z_rna, 1, function(x) ifelse(abs(x) > 1.96,1,0)))
+dim(event_rna)
+# since we need the same number of patients in both clinical and RNASeq data take the indices for the matching samples
+ind_tum <- which(unique(colnames(z_rna)) %in% rownames(all_clin))
+length(ind_tum)
+ind_clin <- which(rownames(all_clin) %in% colnames(z_rna))
+length(ind_clin)
+```
+
+##### Calculating p values for genes: 
+The P values will be calculated from the z score matrix that was created earlier. Here, the p values represents the significance with which a particular gene's mutation will cause death to patients. 
+
+NOTE: I am not able to run this for loop during knit to html, so I am downloading the matrix as a csv file and imprting it during kniting. 
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+for (i in 1:(length(rownames(z_rna)))){
+ind_gene <- rownames(z_rna)[i]
+
+# run survival analysis
+s <- survfit(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum])
+s1 <- tryCatch(survdiff(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum]), error = function(e) return(NA))
+
+# extraect the p.value
+pv[i] <- if (is.na(s1)) next else(round(1 - pchisq(s1$chisq, length(s1$n) - 1),7))[[1]]
+}
 
 ```
 
 
-```{r eval=True}
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+#write.csv(pv, "test.csv")
+library(gdata)                   
+pv = read.csv(file = "test.csv")
 
-# create event vector for RNASeq data
-event_rna <- t(apply(z_rna, 1, function(x) ifelse(abs(x) > 1.96,1,0)))
+# Pvalue and gene symbol matrix construction: 
+siggene <- c(pv)
+siggene <- as.data.frame(siggene)
+colnames(siggene) <- c("pvalue")
+navalue <- rownames(z_rna)
+siggene$geneid <- navalue
+dim(siggene)
+head(siggene)
+# Pvalue distribution for all genes: 
+figure() %>% ly_hist(pv$x,breaks = 200)
 
-# since we need the same number of patients in both clinical and RNASeq data take the indices for the matching samples
-ind_tum <- which(unique(colnames(z_rna)) %in% rownames(all_clin))
-ind_clin <- which(rownames(all_clin) %in% colnames(z_rna))
+```
 
-# pick your gene of interest
-ind_gene <- which(rownames(z_rna) == 'TP53')
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+siggeneSIG <- subset(siggene, siggene$pvalue<0.05)
+# Dimension of significant matrix with genes that will cause death to patients if there is an occurance of mutation on that gene. 
+dim(siggeneSIG)
+head(siggeneSIG)
 
-# check how many altered samples we have
+figure() %>%ly_hist(siggeneSIG$pvalue,breaks = 200)
+# From this analysis, there are 3263 genes that are significant for casuing death to patients when there is a mutation on them. The histogram shows there is about 300 genes that have a very low p value indicating high significance. 
+```
+
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Genes ordered from lowest to highest pvalue: 
+siggene <- siggeneSIG[order(siggeneSIG$pvalue, decreasing = FALSE),]
+kable(siggene[1:100,], "html") %>%
+  kable_styling(bootstrap_options = c("striped","hover"), full_width = F, position = "left") %>%
+  scroll_box(width = "900px", height = "300px")
+```
+
+##### Survival Analysis: 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# gene of interest
+ind_gene <- which(rownames(z_rna) == 'EIF5B')
+
+# No. Of cases where gene has been altered (up or down regulated): 
+table(event_rna[ind_gene,])
+
+# survival analysis
+s <- survfit(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum])
+s1 <- tryCatch(survdiff(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum]), error = function(e) return(NA))
+
+# p.value
+pvEIF5B <- if (is.na(s1)) next else(round(1 - pchisq(s1$chisq, length(s1$n) - 1),7))[[1]]
+
+# plot Survival
+plot(survfit(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum]),
+     col=c(1:3), frame=F, lwd=2,main=paste('LICH',rownames(z_rna)[ind_gene],sep='\n'))
+
+# lines for the median survival
+x1 <- ifelse ( is.na(as.numeric(summary(s)$table[,'median'][1])),'NA',as.numeric(summary(s)$table[,'median'][1]))
+x2 <- as.numeric(summary(s)$table[,'median'][2])
+
+x1
+x2
+# legend
+legend(1800,0.995,legend=paste('p.value = ',pvEIF5B[[1]],sep=''),bty='n',cex=1.4)
+legend(max(as.numeric(as.character(all_clin$death_days)[ind_clin]),na.rm = T)*0.7,0.94,
+       legend=c(paste('NotAltered=',x1),paste('Altered=',x2)),bty='n',cex=1.3,lwd=3,col=c('black','red'))
+# The above KM plot indicates the survival of pateints with up or down regulated (red) and patients without a mutation (Black) for the most significant gene EIF5B. 
+```
+
+Survival Analysis for the cancer gene ICAM1
+
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# gene of interest
+ind_gene <- which(rownames(z_rna) == 'ICAM1')
+
+# No. Of cases where gene has been altered (up or down regulated): 
 table(event_rna[ind_gene,])
 
 # run survival analysis
@@ -369,30 +538,88 @@ s <- survfit(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_cli
 s1 <- tryCatch(survdiff(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum]), error = function(e) return(NA))
 
 # extraect the p.value
-#pv <- ifelse( is.na(s1),next,(round(1 - pchisq(s1$chisq, length(s1$n) - 1),3)))[[1]]
-#pv <- ifelseis.na(s1), next,(round(1 - pchisq(s1$chisq, length(s1$n) - 1),7))[[1]]
-pv <- if (is.na(s1)) next else(round(1 - pchisq(s1$chisq, length(s1$n) - 1),7))[[1]]
+pvEIF5B <- if (is.na(s1)) next else(round(1 - pchisq(s1$chisq, length(s1$n) - 1),7))[[1]]
 
 # plot the data
 plot(survfit(Surv(as.numeric(as.character(all_clin$new_death))[ind_clin],all_clin$death_event[ind_clin])~event_rna[ind_gene,ind_tum]),
-     col=c(1:3), frame=F, lwd=2,main=paste('KIRK',rownames(z_rna)[ind_gene],sep='\n'))
+     col=c(1:3), frame=F, lwd=2,main=paste('LICH',rownames(z_rna)[ind_gene],sep='\n'))
 
 # add lines for the median survival
 x1 <- ifelse ( is.na(as.numeric(summary(s)$table[,'median'][1])),'NA',as.numeric(summary(s)$table[,'median'][1]))
 x2 <- as.numeric(summary(s)$table[,'median'][2])
-#if(x1 != 'NA' & x2 != 'NA'){
-#nbsp; lines(c(0,x1),c(0.5,0.5),col='blue')
-#&nbsp; lines(c(x1,x1),c(0,0.5),col='black')
-#&nbsp; lines(c(x2,x2),c(0,0.5),col='red')
-#}
 
 # add legend
-legend(1800,0.995,legend=paste('p.value = ',pv[[1]],sep=''),bty='n',cex=1.4)
+legend(1800,0.995,legend=paste('p.value = ',pvEIF5B[[1]],sep=''),bty='n',cex=1.4)
 legend(max(as.numeric(as.character(all_clin$death_days)[ind_clin]),na.rm = T)*0.7,0.94,
        legend=c(paste('NotAltered=',x1),paste('Altered=',x2)),bty='n',cex=1.3,lwd=3,col=c('black','red'))
 
 ```
 
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+rna <- mRNAseq
+rna <- as.matrix(rna)
+rna <- apply(rna,1,as.numeric)
+rna <-t(rna)
+```
 
-### Results
-Describe your results and include relevant tables, plots, and code/comments used to obtain them. End with a brief conclusion of your findings related to the question you set out to address. You can include references if you'd like, but this is not required.
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+siggene[which(siggene$geneid == "EIF5B"),]
+siggene[which(siggene$geneid == "ICAM1"),]
+#Scatter plot of gene counts of ICAM1 and EIF5B
+plot(rna[4720,],rna[6978,])
+#Density plot of gene counts of ICAM1 and EIF5B
+figure() %>% ly_hexbin(rna[4720,],rna[6978,])
+#Density plot of voom normalized gene counts of ICAM1 and EIF5B
+figure() %>% ly_hexbin(rna_vm[4720,],rna_vm[6978,])
+```
+
+# Subsetting for p value <0.001:
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+siggeneSIG <- subset(siggene, siggene$pvalue<0.001)
+figure() %>% ly_hist(siggeneSIG$pvalue,breaks = 200)
+c <- order(rownames(siggeneSIG), decreasing = FALSE)
+length(c)
+significant <- rna_vm[c,]
+dim(significant)
+```
+
+```{r, eval=TRUE, message=FALSE, warning=FALSE}
+# Histogram of all normalized counts with voom function: 
+hist(significant)
+# Histogram of Column Sum:
+hist(colSums(significant))
+# Histogram of Column Mean:
+hist(colMeans(significant))
+# Histogram of Column Standard Deviation:
+hist(colSds(significant))
+# Density plot of Column Mean vs Column Standard deviation:
+figure(ylab = "Stan. Dev. of Columns(rna_vm)", xlab = "Means of Columns(rna_vm)", title = "Standard Deviation vs Mean of Columns of rna_vm (Between samples)") %>% ly_hexbin(colMeans(significant), colSds(significant)) 
+# Histogram of row Mean:
+hist(rowMeans(significant))
+# Histogram of row Standard Deviation:
+hist(rowSds(significant)) 
+# Density plot of Row Mean vs row Standard Deviation:
+figure(ylab = "Stan. Dev. of Rows(rna_vm)", xlab = "Means of Rows(rna_vm)", title = "Standard Deviation vs Mean of Rows of rna_vm (Between Genes)") %>% ly_hexbin(rowMeans(significant), rowSds(significant)) 
+```
+
+### Conclusion: 
+
+Overall, I was able to use the TCGA dataset to get a concrete dataset with the appropriate clinical and mRNAseq datas to find the genes that are of significant in the casue of death in patient who develop a mutation on those particular genes. Using this results, in the furture, I would further extend my experiment by performing gene network analysis to find the genes that are directly or indirectly involved with membrance signaling pathway so that those gene's infomation can be use to improve the computation of nanoscale drug delivery simulation by introducing the genotype/phenotype influence on the nano drug capture of these cancer cells in each specific organ. I would futher like to automate this process to output genes of interest simply by specifying the cancer project or a combination of projects. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
